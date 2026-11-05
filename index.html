@@ -1,0 +1,1442 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>APLE-Trainer TLF 3000/200</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* ==========================================================
+       1. Farben & Grundwerte
+       ========================================================== */
+    :root {
+      --red:      #c8102e;
+      --red-dark: #9b0c23;
+      --red-soft: #fdecef;
+
+      --ink:      #1c1e22;
+      --ink-2:    #2a2d33;
+      --muted:    #5f636a;
+
+      /* Hintergründe – hier hell/dunkel einstellen */
+      --bg:       #d3d1ca;   /* Seitenhintergrund (vorher fast weiß: #f4f3ef) */
+      --card:     #ebe9e3;   /* Kästen/Panels     (vorher weiß: #ffffff)      */
+      --card-2:   #f5f4f0;   /* Felder, Antworten, Karte zum Ziehen          */
+      --soft:     #dfddd6;   /* Kacheln, Hover-Zeilen                        */
+      --line:     #c9c6be;   /* Rahmen & Trennlinien                         */
+
+      --ok:       #1f8a4c;
+      --ok-bg:    #e3f4ea;
+      --bad:      #b3261e;
+      --bad-bg:   #fbe7e5;
+
+      --highlight:  #ffc627;
+      --steel:      #8e949b;
+      --steel-dark: #5f656c;
+
+      --radius:    14px;
+      --radius-sm: 9px;
+      --shadow:    0 1px 2px rgba(20, 22, 26, .05), 0 4px 14px rgba(20, 22, 26, .06);
+      --shadow-lg: 0 10px 30px rgba(20, 22, 26, .14);
+
+      --font:      Barlow, system-ui, -apple-system, "Segoe UI", sans-serif;
+      --font-head: "Barlow Condensed", Barlow, system-ui, sans-serif;
+    }
+
+    /* ==========================================================
+       2. Basis
+       ========================================================== */
+    * { box-sizing: border-box; }
+
+    html, body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: var(--font);
+      font-size: 16px;
+      line-height: 1.45;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button { font: inherit; cursor: pointer; }
+    button:focus-visible,
+    input:focus-visible,
+    .zone:focus-visible {
+      outline: 3px solid var(--highlight);
+      outline-offset: 2px;
+    }
+
+    h1, h2, h3 { margin: 0; }
+    h2 { font-family: var(--font-head); font-size: 1.5rem; margin-bottom: 8px; letter-spacing: .2px; }
+    h3 { font-size: 1.05rem; margin-bottom: 8px; }
+
+    .muted { color: var(--muted); }
+    .small { font-size: .875rem; }
+
+    code {
+      background: var(--soft);
+      padding: 1px 5px;
+      border-radius: 4px;
+      font-size: .9em;
+    }
+
+    /* ==========================================================
+       3. Kopfbereich & Navigation
+       ========================================================== */
+    .site-header {
+      background: linear-gradient(135deg, #24272d 0%, var(--ink) 60%);
+      color: #fff;
+      padding: 14px 16px 0;
+      border-bottom: 4px solid var(--red);
+    }
+
+    /* Drei Spalten: voestalpine | BTF Traisen | +GF+ */
+    .header-inner {
+      max-width: 1000px;
+      margin: 0 auto;
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .partner {
+      background: #fff;
+      border-radius: 10px;
+      padding: 7px 12px;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, .3);
+    }
+    .partner img  { display: block; height: 30px; width: auto; }
+    .partner span { font-weight: 700; color: var(--ink); white-space: nowrap; }
+    .partner-left  { justify-self: start; }
+    .partner-right { justify-self: end; }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    /* Logo: zeigt logos/btf-traisen.png, sonst die Flamme */
+    .brand-logo {
+      position: relative;
+      flex: none;
+      width: 46px;
+      height: 46px;
+      border-radius: 11px;
+      background: var(--red);
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(200, 16, 46, .4);
+    }
+    .brand-logo svg { width: 28px; height: 28px; }
+    .brand-logo img {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #fff;
+      padding: 2px;
+    }
+    /* Wenn das echte (runde) Logo da ist: rund, weiß, etwas größer */
+    .brand-logo:has(img) {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: #fff;
+      box-shadow: 0 0 0 3px rgba(255, 255, 255, .15), 0 2px 10px rgba(0, 0, 0, .35);
+    }
+
+    .brand-title {
+      font-family: var(--font-head);
+      font-size: 2.6rem;
+      line-height: 1;
+      letter-spacing: .5px;
+      text-transform: uppercase;
+    }
+    .brand-sub { font-size: .85rem; color: #b9bcc2; }
+
+    .main-nav {
+      max-width: 1000px;
+      margin: 12px auto 0;
+      display: flex;
+      gap: 4px;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .main-nav::-webkit-scrollbar { display: none; }
+
+    .main-nav button {
+      background: none;
+      border: 0;
+      color: #c9ccd1;
+      padding: 10px 16px 12px;
+      font-weight: 600;
+      white-space: nowrap;
+      border-radius: 10px 10px 0 0;
+      transition: background-color .15s, color .15s;
+    }
+    .main-nav button:hover { color: #fff; background: rgba(255, 255, 255, .06); }
+    .main-nav button.on    { color: var(--ink); background: var(--bg); }
+
+    /* ==========================================================
+       4. Layout & Bausteine
+       ========================================================== */
+    main {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 18px 16px 8px;
+    }
+
+    .panel {
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 18px;
+      margin-bottom: 14px;
+      box-shadow: var(--shadow);
+    }
+
+    .hero {
+      background:
+        radial-gradient(circle at 100% 0%, rgba(200, 16, 46, .10), transparent 55%),
+        var(--card);
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+
+    /* Modus-Karten auf der Startseite */
+    .mode {
+      display: flex;
+      gap: 14px;
+      align-items: flex-start;
+      text-align: left;
+      background: var(--card);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+      transition: transform .15s, box-shadow .15s, border-color .15s;
+    }
+    .mode:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-lg);
+      border-color: var(--red);
+    }
+    .mode-icon {
+      flex: none;
+      width: 42px;
+      height: 42px;
+      border-radius: 10px;
+      background: var(--red-soft);
+      color: var(--red);
+      display: grid;
+      place-items: center;
+    }
+    .mode-icon svg { width: 22px; height: 22px; }
+    .mode b { display: block; font-size: 1.1rem; margin-bottom: 2px; }
+
+    /* Buttons */
+    .btn {
+      background: var(--red);
+      color: #fff;
+      border: 0;
+      border-radius: var(--radius-sm);
+      padding: 10px 18px;
+      font-weight: 600;
+      transition: background-color .15s, transform .1s;
+    }
+    .btn:hover  { background: var(--red-dark); }
+    .btn:active { transform: translateY(1px); }
+
+    .btn.secondary {
+      background: var(--card-2);
+      color: var(--ink);
+      border: 1px solid var(--line);
+    }
+    .btn.secondary:hover { border-color: var(--ink); }
+
+    .btn.link {
+      background: none;
+      color: var(--muted);
+      padding: 6px 0;
+      text-decoration: underline;
+    }
+
+    /* Umschalter (Fragen pro Runde) */
+    .segmented {
+      display: inline-flex;
+      background: var(--soft);
+      border-radius: 10px;
+      padding: 3px;
+    }
+    .segmented button {
+      background: none;
+      border: 0;
+      border-radius: 8px;
+      padding: 6px 14px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+    .segmented button.on {
+      background: var(--card-2);
+      color: var(--ink);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, .12);
+    }
+
+    /* Kennzahlen */
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+      gap: 10px;
+    }
+    .stat {
+      background: var(--soft);
+      border-radius: 10px;
+      padding: 12px 14px;
+    }
+    .stat b {
+      display: block;
+      font-family: var(--font-head);
+      font-size: 2rem;
+      line-height: 1;
+      margin-bottom: 2px;
+    }
+
+    .weak-list { padding-left: 18px; margin: 0; }
+    .weak-list li { margin: 4px 0; }
+
+    /* Tabellen */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: .95rem; }
+    th, td {
+      text-align: left;
+      padding: 8px 8px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+    }
+    td { hyphens: auto; -webkit-hyphens: auto; overflow-wrap: break-word; }
+    th {
+      font-size: .78rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .5px;
+    }
+    tbody tr:hover { background: var(--soft); }
+
+    .tag {
+      display: inline-block;
+      background: var(--ink);
+      color: #fff;
+      border-radius: 6px;
+      padding: 1px 8px;
+      font-weight: 700;
+      font-size: .82rem;
+    }
+
+    input[type=search] {
+      width: 100%;
+      padding: 11px 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius-sm);
+      font: inherit;
+      background: var(--card-2);
+    }
+
+    .hint { font-size: .85rem; color: var(--muted); margin-top: 8px; }
+
+    /* ==========================================================
+       5. Fahrzeug-Grafik
+       ========================================================== */
+    .sides { display: grid; gap: 14px; }
+    @media (min-width: 900px) { .sides { grid-template-columns: 1fr 1fr; } }
+
+    .side-title {
+      font-size: .78rem;
+      font-weight: 700;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: .7px;
+      margin: 0 0 6px 2px;
+    }
+
+    .truck {
+      position: relative;
+      display: flex;
+      align-items: flex-end;
+      padding-bottom: 26px;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    /* Bodenschatten */
+    .truck::after {
+      content: "";
+      position: absolute;
+      left: 3%;
+      right: 3%;
+      bottom: 2px;
+      height: 8px;
+      border-radius: 50%;
+      background: rgba(0, 0, 0, .12);
+      filter: blur(3px);
+      z-index: -1;
+    }
+    .truck.reverse { flex-direction: row-reverse; }
+
+    .cab {
+      width: 21%;
+      height: 150px;
+      background: linear-gradient(180deg, #d81635, var(--red));
+      border-radius: 26px 6px 0 0;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding-top: 76px;
+    }
+    .truck.reverse .cab { border-radius: 6px 26px 0 0; }
+
+    .cab .window {
+      position: absolute;
+      top: 14px;
+      left: 12%;
+      right: 12%;
+      height: 52px;
+      background: linear-gradient(160deg, #e3f0f6, #b9d4e2);
+      border-radius: 14px 4px 4px 4px;
+      border: 3px solid #7f0a1d;
+    }
+    .truck.reverse .cab .window { border-radius: 4px 14px 4px 4px; }
+
+    .body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin: 0 4px;
+    }
+
+    .roof {
+      height: 34px;
+      background: var(--steel);
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      color: #fff;
+    }
+
+    .compartments { display: flex; gap: 4px; height: 112px; }
+    .truck.reverse .compartments { flex-direction: row-reverse; }
+
+    /* Rollladen-Optik der Geräteräume */
+    .compartment {
+      flex: 1;
+      border-radius: 4px;
+      background:
+        repeating-linear-gradient(180deg, transparent 0 9px, rgba(0, 0, 0, .14) 9px 11px),
+        var(--red);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+    }
+
+    .rear {
+      width: 11%;
+      height: 150px;
+      background: var(--steel-dark);
+      border-radius: 4px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      color: #fff;
+    }
+    .rear.deco { width: 5%; }
+
+    .wheel {
+      position: absolute;
+      bottom: 0;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #6b6f76 0 22%, #2b2d31 24%);
+      border: 8px solid #3d4046;
+    }
+    .wheel.front { left: 5%; }
+    .wheel.back  { right: 14%; }
+    .truck.reverse .wheel.front { left: auto; right: 5%; }
+    .truck.reverse .wheel.back  { right: auto; left: 14%; }
+
+    /* Anklickbare Räume */
+    .zone {
+      cursor: pointer;
+      outline: 3px solid transparent;
+      outline-offset: 1px;
+      transition: outline-color .1s, background-color .15s, transform .1s, filter .15s;
+    }
+    .zone:hover    { outline-color: rgba(255, 198, 39, .6); filter: brightness(1.06); }
+    .zone.hover    { outline-color: var(--highlight); transform: scale(1.03); }
+    .zone.selected { outline-color: var(--highlight); }
+    .zone.ok       { background: var(--ok) !important;  outline-color: var(--ok); }
+    .zone.bad      { background: #3a3c40 !important;    outline-color: var(--bad); }
+    .zone.reveal   { animation: pulse 1s ease-in-out 2; outline-color: var(--ok); }
+    @keyframes pulse { 50% { outline-color: transparent; } }
+
+    .zone-label {
+      font-family: var(--font-head);
+      font-weight: 700;
+      font-size: 1.35rem;
+      color: #fff;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, .35);
+      line-height: 1;
+    }
+    .cab .zone-label,
+    .rear .zone-label,
+    .roof .zone-label { font-size: 1.05rem; }
+
+    .zone-count {
+      font-size: .75rem;
+      color: #fff;
+      opacity: .9;
+      margin-top: 2px;
+    }
+    .roof .zone-count { margin: 0; }
+    .rear .zone-count { font-size: .65rem; }
+
+    .extra-rooms { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px; }
+    .extra-rooms .zone {
+      background: var(--steel-dark);
+      border-radius: 6px;
+      padding: 10px 14px;
+      min-width: 70px;
+      text-align: center;
+    }
+    .extra-rooms .zone-label { font-size: 1rem; }
+
+    /* ==========================================================
+       6. Zuordnen (Drag & Drop)
+       ========================================================== */
+    .stage {
+      position: sticky;
+      top: 0;
+      z-index: 5;
+      background: var(--bg);
+      padding: 6px 0 10px;
+    }
+
+    .progress-info {
+      display: flex;
+      justify-content: space-between;
+      font-size: .85rem;
+      color: var(--muted);
+      margin-bottom: 6px;
+    }
+    .progress {
+      height: 6px;
+      background: var(--line);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+    .progress i {
+      display: block;
+      height: 100%;
+      background: linear-gradient(90deg, var(--red-dark), var(--red));
+      border-radius: 3px;
+      transition: width .3s ease;
+    }
+
+    .drag-card {
+      background: var(--card-2);
+      border: 2px solid var(--ink);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      touch-action: none;
+      cursor: grab;
+      box-shadow: 0 3px 0 var(--ink);
+    }
+    .drag-card .grip {
+      width: 14px;
+      flex: none;
+      align-self: stretch;
+      background: radial-gradient(circle, #999 1.6px, transparent 2px) 0 0 / 7px 7px;
+    }
+    .drag-card .name   { font-weight: 700; font-size: 1.15rem; }
+    .drag-card.lifted  { opacity: .35; }
+    .drag-ghost {
+      position: fixed;
+      z-index: 100;
+      pointer-events: none;
+      transform: rotate(-2deg);
+      box-shadow: var(--shadow-lg);
+      width: min(340px, 80vw);
+    }
+
+    /* Rückmeldung richtig/falsch */
+    .feedback {
+      display: none;
+      min-height: 48px;
+      margin-top: 10px;
+      border-radius: 10px;
+      padding: 10px 14px;
+    }
+    .feedback.show {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      animation: pop .2s ease-out;
+    }
+    .feedback.ok  { background: var(--ok-bg);  color: var(--ok); }
+    .feedback.bad { background: var(--bad-bg); color: var(--bad); }
+    @keyframes pop { from { transform: translateY(-4px); opacity: 0; } }
+
+    /* ==========================================================
+       7. Quiz & Ergebnis
+       ========================================================== */
+    .question { font-size: 1.3rem; font-weight: 700; margin: 4px 0 16px; }
+
+    .options { display: grid; gap: 8px; }
+    .option {
+      text-align: left;
+      background: var(--card-2);
+      border: 1.5px solid var(--line);
+      border-radius: 10px;
+      padding: 13px 16px;
+      font-weight: 600;
+      transition: border-color .15s, background-color .15s;
+    }
+    .option:hover:not(:disabled) { border-color: var(--ink); background: #fff; }
+    .option:disabled { cursor: default; }
+    .option.ok  { background: var(--ok-bg);  border-color: var(--ok);  color: var(--ok); }
+    .option.bad { background: var(--bad-bg); border-color: var(--bad); color: var(--bad); }
+
+    .result-big {
+      font-family: var(--font-head);
+      font-size: 3.4rem;
+      line-height: 1;
+      margin: 6px 0;
+    }
+
+    /* ==========================================================
+       8. Fußzeile mit Partner-Logos
+       ========================================================== */
+    .site-footer {
+      max-width: 1000px;
+      margin: 10px auto 0;
+      padding: 18px 16px 28px;
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--muted);
+      font-size: .85rem;
+    }
+
+    /* ==========================================================
+       9. Handy
+       ========================================================== */
+    @media (max-width: 560px) {
+      .header-inner { gap: 8px; }
+      .partner { padding: 5px 7px; border-radius: 8px; }
+      .partner img { height: 16px; }
+      .partner span { font-size: .75rem; }
+      .brand { flex-direction: column; gap: 4px; text-align: center; }
+      .brand-logo:has(img) { width: 54px; height: 54px; }
+      .brand-title { font-size: 1.7rem; }
+      .brand-sub { font-size: .75rem; }
+
+      main { padding: 12px 10px 6px; }
+      .panel { padding: 14px; }
+      .cab, .rear { height: 120px; }
+      .cab { padding-top: 60px; }
+      .cab .window { height: 40px; top: 12px; }
+      .compartments { height: 88px; }
+      .roof { height: 28px; }
+      .zone-label { font-size: 1.15rem; }
+      .cab .zone-label, .rear .zone-label, .roof .zone-label { font-size: .9rem; }
+      .rear .zone-label { font-size: .75rem; }
+      .zone-count { font-size: .68rem; }
+      .wheel { width: 38px; height: 38px; border-width: 6px; }
+      .question { font-size: 1.12rem; }
+    }
+  </style>
+</head>
+
+<body>
+  <header class="site-header">
+    <div class="header-inner">
+      <!-- Links: voestalpine -->
+      <div class="partner partner-left">
+        <img src="logos/voestalpine.svg" alt="voestalpine" data-fallback="text">
+      </div>
+
+      <!-- Mitte: Feuerwehr-Logo + BTF Traisen -->
+      <div class="brand">
+        <div class="brand-logo" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="#fff">
+            <path d="M12 2c1 3.5 5 5.8 5 11a5 5 0 0 1-10 0c0-2.4 1-4 2.2-5.3.2 1.8 1 3 2.3 3.6C11 8.6 11.3 5 12 2z"/>
+          </svg>
+          <img src="logos/btf-traisen.png" alt="" data-fallback="remove">
+        </div>
+        <div>
+          <h1 class="brand-title">BTF Traisen</h1>
+          <div class="brand-sub">APLE-Trainer · TLF 3000/200</div>
+        </div>
+      </div>
+
+      <!-- Rechts: Georg Fischer -->
+      <div class="partner partner-right">
+        <img src="logos/gf.svg" alt="+GF+" data-fallback="text">
+      </div>
+    </div>
+
+    <nav class="main-nav" id="nav">
+      <button data-view="start" class="on">Start</button>
+      <button data-view="drill">Zuordnen</button>
+      <button data-view="quiz">Quiz</button>
+      <button data-view="learn">Lernen</button>
+      <button data-view="list">Beladeliste</button>
+    </nav>
+  </header>
+
+  <main id="app"></main>
+
+  <footer class="site-footer">
+    <span>Betriebsfeuerwehr Traisen · Mariazellerstraße 75, 3160 Traisen</span>
+  </footer>
+
+<script>
+'use strict';
+
+/* ==============================================================
+   1. Einstellungen
+   ============================================================== */
+const CONFIG = {
+  listStand: 'Beispielbeladung (noch nicht eure echte Liste)',
+  statsKey:  'aple_tlf_stats_v1',
+};
+
+/* ==============================================================
+   2. Beladeliste
+   Format pro Zeile:  Gerät;Geräteraum;Fach;Hinweis
+   ============================================================== */
+const DEFAULT_LIST = `Gerät;Geräteraum;Fach;Hinweis
+Pressluftatmer (4 Stk.);MR;Sitzhalterungen;in den Rückenlehnen
+Atemschutzmasken;MR;Maskenbox unter Sitzbank;
+Handfunkgeräte;MR;Ladehalterung;
+Handscheinwerfer;MR;Ladehalterung;
+Wärmebildkamera;MR;Halterung Mittelkonsole;
+Fluchthauben;MR;Tasche Rückwand;
+Warnwesten;MR;Ablage;
+Erste-Hilfe-Rucksack;MR;hinter Beifahrersitz;
+Reserve-Atemluftflaschen;G1;oben;4 Stk.
+Atemschutz-Überwachungstafel;G1;oben;
+Atemschutz-Rettungsleine;G1;Mitte;
+Feuerwehrleinen;G1;Mitte;2 Stk. im Beutel
+Standrohr;G1;unten;
+Unterflurhydrantenschlüssel;G1;unten;
+Überflurhydrantenschlüssel;G1;unten;
+Kupplungsschlüssel ABC;G1;Türinnenseite;
+Rauchvorhang;G1;Mitte;
+Stromerzeuger 8 kVA;G2;Auszug unten;
+Kabeltrommeln 230 V;G2;Mitte;2 Stk.
+Flutlichtstrahler mit Stativ;G2;oben;
+Steckdosenverteiler;G2;Mitte;
+Tauchpumpe;G2;Auszug unten;
+Tauchpumpen-Druckschlauch C;G2;Mitte;
+B-Druckschläuche 20 m;G3;Mitte;4 Stk.
+C-Druckschläuche 15 m;G3;oben;in Schlauchtragekörben
+Verteiler B-CBC;G3;unten;
+C-Hohlstrahlrohre;G3;Türinnenseite;2 Stk.
+B-Strahlrohr;G3;Türinnenseite;
+Schlauchbrücken;G3;unten;
+Schlauchhalter und Schlauchbinden;G3;Mitte;
+Schaummittel-Kanister 20 l;G4;unten;4 Stk.
+Zumischer Z4;G4;oben;
+Mittelschaumrohr M4;G4;Mitte;
+Schwerschaumrohr S4;G4;Mitte;
+Schaumansaugschlauch;G4;oben;
+Pulverlöscher PG 12;G4;unten;
+CO2-Löscher K 5;G4;unten;
+Löschdecke;G4;Türinnenseite;
+Verkehrsleitkegel;G5;unten;6 Stk.
+Faltsignal „Unfall";G5;Mitte;
+Warnblitzleuchten;G5;oben;
+Absperrband;G5;oben;
+Saugkorb A;G5;unten;
+Saugschutzkorb;G5;unten;
+Ventilleine;G5;Mitte;
+Übergangsstücke A-B und B-C;G5;Mitte;
+Sammelstück A-2B;G5;Mitte;
+Motorkettensäge;G6;Auszug unten;mit Schnittschutzausrüstung
+Brechstange;G6;Mitte;
+Bolzenschneider;G6;Mitte;
+Feuerwehraxt;G6;Türinnenseite;
+Einreißhaken;G6;oben;
+Schaufel und Besen;G6;oben;
+Ölbindemittel;G6;unten;2 Sack
+Werkzeugkiste;G6;Mitte;
+Pumpenbedienstand;HECK;;Normaldruck- und Hochdruckpumpe
+HD-Schnellangriff 60 m;HECK;Haspel;
+Druckabgänge B;HECK;;
+Saugschläuche A 1,6 m;DACH;;4 Stk.
+Steckleiter 4-teilig;DACH;;
+Krankentrage;DACH;;
+`;
+
+/* ==============================================================
+   3. Geräteräume
+   ============================================================== */
+const ROOM_LABEL = { MR: 'Mannschaftsraum', DACH: 'Dach', HECK: 'Heck / Pumpenraum' };
+const ROOM_SHORT = { MR: 'MR', DACH: 'Dach', HECK: 'Heck' };
+
+const DRIVER_SIDE    = ['G1', 'G3', 'G5'];
+const PASSENGER_SIDE = ['G2', 'G4', 'G6'];
+const LAYOUT         = [...DRIVER_SIDE, ...PASSENGER_SIDE, 'MR', 'DACH', 'HECK'];
+
+const roomLabel = room => ROOM_LABEL[room] || (/^G\d+$/.test(room) ? `Geräteraum ${room}` : room);
+const roomShort = room => ROOM_SHORT[room] || room;
+
+/** Vereinheitlicht Schreibweisen wie "G 1", "GR1", "Pumpenraum" usw. */
+function normalizeRoom(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+
+  const key = raw.toUpperCase().replace(/[\s.\-]/g, '');
+  if (/^G\d+$/.test(key))   return key;
+  if (/^GR?\d+$/.test(key)) return 'G' + key.replace(/\D/g, '');
+  if (['HECK', 'P', 'PUMPENRAUM', 'PUMPE', 'GR', 'HECKRAUM'].includes(key))          return 'HECK';
+  if (['DACH', 'D', 'DACHKASTEN'].includes(key))                                      return 'DACH';
+  if (['MR', 'MANNSCHAFTSRAUM', 'KABINE', 'FAHRERHAUS', 'MANNSCHAFT'].includes(key))  return 'MR';
+  return raw;
+}
+
+/* ==============================================================
+   4. Hilfsfunktionen
+   ============================================================== */
+const $  = (selector, root = document) => root.querySelector(selector);
+const $$ = (selector, root = document) => [...root.querySelectorAll(selector)];
+
+const escapeHtml = text => String(text).replace(/[&<>"']/g, c => ({
+  '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;',
+}[c]));
+
+function shuffle(array) {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+}
+
+/** localStorage, das nie abstürzt (z. B. im privaten Modus) */
+const storage = {
+  get(key)        { try { return localStorage.getItem(key); } catch { return null; } },
+  set(key, value) { try { localStorage.setItem(key, value); } catch { /* egal */ } },
+  remove(key)     { try { localStorage.removeItem(key); } catch { /* egal */ } },
+};
+
+/* ==============================================================
+   5. Liste einlesen
+   ============================================================== */
+function parseList(text) {
+  const items = [];
+  const lines = String(text).replace(/\r/g, '').split('\n');
+
+  lines.forEach((line, index) => {
+    if (!line.trim()) return;
+
+    const separator = line.includes('\t') ? '\t' : line.includes(';') ? ';' : ',';
+    const cells = line.split(separator).map(c => c.trim().replace(/^"(.*)"$/, '$1'));
+    const [name, room, fach = '', hint = ''] = cells;
+
+    if (index === 0 && /^ger(ä|ae|a)t/i.test(name)) return; // Kopfzeile
+    if (!name) return;
+
+    const normalized = normalizeRoom(room);
+    if (normalized) items.push({ name, room: normalized, fach, hint });
+  });
+
+  return items;
+}
+
+const ITEMS = parseList(DEFAULT_LIST);
+
+const roomsPresent = () => [...new Set(ITEMS.map(i => i.room))];
+const extraRooms   = () => roomsPresent().filter(r => !LAYOUT.includes(r)).sort();
+const itemsInRoom  = room => ITEMS.filter(i => i.room === room);
+
+/* ==============================================================
+   6. Statistik – falsch beantwortete Geräte kommen öfter dran
+   ============================================================== */
+let STATS = {};
+try { STATS = JSON.parse(storage.get(CONFIG.statsKey) || '{}') || {}; } catch { STATS = {}; }
+
+const statKey = item => `${item.name}|${item.room}`;
+
+function recordAnswer(item, correct) {
+  const entry = STATS[statKey(item)] ||= { r: 0, f: 0 };
+  correct ? entry.r++ : entry.f++;
+  storage.set(CONFIG.statsKey, JSON.stringify(STATS));
+}
+
+function weightOf(item) {
+  const s = STATS[statKey(item)];
+  if (!s) return 2;                               // noch nie gefragt
+  return Math.max(0.4, 1 + s.f * 2 - s.r * 0.5);  // Fehler zählen stark
+}
+
+/** Wählt n Geräte zufällig, gewichtet nach Schwierigkeit */
+function pickItems(n) {
+  const pool = ITEMS.slice();
+  const picked = [];
+
+  while (picked.length < n && pool.length) {
+    const total = pool.reduce((sum, item) => sum + weightOf(item), 0);
+    let r = Math.random() * total;
+    let j = 0;
+    for (; j < pool.length; j++) {
+      r -= weightOf(pool[j]);
+      if (r <= 0) break;
+    }
+    picked.push(pool.splice(Math.min(j, pool.length - 1), 1)[0]);
+  }
+  return picked;
+}
+
+function totals() {
+  let right = 0, wrong = 0;
+  Object.values(STATS).forEach(s => { right += s.r; wrong += s.f; });
+  return { right, wrong, all: right + wrong };
+}
+
+/* ==============================================================
+   7. Fahrzeug zeichnen
+   ============================================================== */
+function zoneContent(room, showCount) {
+  const count = itemsInRoom(room).length;
+  return `<span class="zone-label">${escapeHtml(roomShort(room))}</span>`
+       + (showCount ? `<span class="zone-count">${count} Geräte</span>` : '');
+}
+
+function vehicleHTML(showCount) {
+  const zoneAttrs = room => `data-room="${escapeHtml(room)}" tabindex="0" role="button" aria-label="${escapeHtml(roomLabel(room))}"`;
+  const compartments = rooms => rooms
+    .map(r => `<div class="compartment zone" ${zoneAttrs(r)}>${zoneContent(r, showCount)}</div>`)
+    .join('');
+  const extras = extraRooms();
+
+  return `
+    <div class="sides">
+      <div>
+        <div class="side-title">Fahrerseite (links)</div>
+        <div class="truck">
+          <div class="cab zone" ${zoneAttrs('MR')}><div class="window"></div>${zoneContent('MR', showCount)}</div>
+          <div class="body">
+            <div class="roof zone" ${zoneAttrs('DACH')}>${zoneContent('DACH', showCount)}</div>
+            <div class="compartments">${compartments(DRIVER_SIDE)}</div>
+          </div>
+          <div class="rear zone" ${zoneAttrs('HECK')}>${zoneContent('HECK', showCount)}</div>
+          <div class="wheel front"></div><div class="wheel back"></div>
+        </div>
+      </div>
+      <div>
+        <div class="side-title">Beifahrerseite (rechts)</div>
+        <div class="truck reverse">
+          <div class="cab"><div class="window"></div></div>
+          <div class="body">
+            <div class="roof"></div>
+            <div class="compartments">${compartments(PASSENGER_SIDE)}</div>
+          </div>
+          <div class="rear deco"></div>
+          <div class="wheel front"></div><div class="wheel back"></div>
+        </div>
+      </div>
+    </div>
+    ${extras.length ? `
+      <div class="side-title" style="margin-top:12px">Weitere Räume</div>
+      <div class="extra-rooms">
+        ${extras.map(r => `<div class="zone" ${zoneAttrs(r)}>${zoneContent(r, showCount)}</div>`).join('')}
+      </div>` : ''}`;
+}
+
+/** Klick + Enter/Leertaste auf einem Geräteraum */
+function onZoneSelect(root, handler) {
+  $$('.zone', root).forEach(zone => {
+    zone.addEventListener('click', () => handler(zone.dataset.room));
+    zone.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); handler(zone.dataset.room); }
+    });
+  });
+}
+
+function itemTable(items, { showRoom = false } = {}) {
+  return `<div class="table-wrap"><table>
+    <thead><tr><th>Gerät</th>${showRoom ? '<th>Raum</th>' : ''}<th>Fach</th><th>Hinweis</th></tr></thead>
+    <tbody>${items.map(i => `
+      <tr>
+        <td><b>${escapeHtml(i.name)}</b></td>
+        ${showRoom ? `<td><span class="tag">${escapeHtml(roomShort(i.room))}</span></td>` : ''}
+        <td>${escapeHtml(i.fach)}</td>
+        <td class="muted">${escapeHtml(i.hint)}</td>
+      </tr>`).join('')}
+    </tbody></table></div>`;
+}
+
+const locationText = item =>
+  `<b>${escapeHtml(roomLabel(item.room))}</b>`
+  + (item.fach ? ` · ${escapeHtml(item.fach)}` : '')
+  + (item.hint ? ` <span class="small">(${escapeHtml(item.hint)})</span>` : '');
+
+/* ==============================================================
+   8. Navigation
+   ============================================================== */
+const app = $('#app');
+let currentView = 'start';
+let roundSize = 10;  // 0 = alle
+
+const roundLength = () => roundSize || ITEMS.length;
+
+const VIEWS = {
+  start: renderStart,
+  drill: startDrill,
+  quiz:  startQuiz,
+  learn: renderLearn,
+  list:  renderList,
+};
+
+function setView(view) {
+  currentView = view;
+  $$('#nav button').forEach(b => b.classList.toggle('on', b.dataset.view === view));
+  VIEWS[view]();
+  window.scrollTo(0, 0);
+}
+
+$('#nav').addEventListener('click', e => {
+  const button = e.target.closest('button');
+  if (button) setView(button.dataset.view);
+});
+
+/* ==============================================================
+   9. Startseite
+   ============================================================== */
+const ICONS = {
+  drill: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M12 2v20"/></svg>',
+  quiz:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3M12 17h.01"/></svg>',
+  learn: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 4h7a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H2zM22 4h-7a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h8z"/></svg>',
+};
+
+function renderStart() {
+  const t = totals();
+  const weak = ITEMS
+    .map(item => ({ item, s: STATS[statKey(item)] }))
+    .filter(x => x.s && x.s.f > 0 && x.s.f > x.s.r * 0.5)
+    .sort((a, b) => (b.s.f - b.s.r) - (a.s.f - a.s.r))
+    .slice(0, 6);
+
+  const modeCard = (view, title, text) => `
+    <button class="mode" data-go="${view}">
+      <span class="mode-icon">${ICONS[view]}</span>
+      <span><b>${title}</b><span class="muted small">${text}</span></span>
+    </button>`;
+
+  app.innerHTML = `
+    <section class="panel hero">
+      <h2>Servus!</h2>
+      <p class="muted" style="margin:0 0 14px">Übe, wo im TLF welches Gerät liegt. Geräte, die du falsch zuordnest, kommen öfter dran.</p>
+      <div class="row">
+        <span class="small muted">Fragen pro Runde:</span>
+        <div class="segmented" id="round-size">
+          ${[10, 20, 0].map(n => `<button data-n="${n}" class="${roundSize === n ? 'on' : ''}">${n || 'Alle'}</button>`).join('')}
+        </div>
+      </div>
+    </section>
+
+    <div class="grid">
+      ${modeCard('drill', 'Zuordnen', 'Gerät in den richtigen Geräteraum ziehen')}
+      ${modeCard('quiz',  'Quiz',     '„Wo liegt …?" und „Was liegt in …?"')}
+      ${modeCard('learn', 'Lernen',   'Fahrzeug durchklicken, Beladung ansehen')}
+    </div>
+
+    <section class="panel">
+      <h3>Dein Stand</h3>
+      <div class="stats">
+        <div class="stat"><b>${ITEMS.length}</b><span class="small muted">Geräte in der Liste</span></div>
+        <div class="stat"><b>${t.all}</b><span class="small muted">Antworten</span></div>
+        <div class="stat"><b>${t.all ? Math.round(t.right / t.all * 100) + ' %' : '–'}</b><span class="small muted">richtig</span></div>
+      </div>
+      ${weak.length ? `
+        <h3 style="margin-top:16px">Noch üben</h3>
+        <ul class="weak-list small">
+          ${weak.map(x => `<li><b>${escapeHtml(x.item.name)}</b> → <span class="tag">${escapeHtml(roomShort(x.item.room))}</span>${x.item.fach ? ' ' + escapeHtml(x.item.fach) : ''}</li>`).join('')}
+        </ul>` : ''}
+      ${t.all ? '<button class="btn link" id="reset">Statistik zurücksetzen</button>' : ''}
+    </section>`;
+
+  $('#round-size').addEventListener('click', e => {
+    const b = e.target.closest('button');
+    if (!b) return;
+    roundSize = Number(b.dataset.n);
+    renderStart();
+  });
+
+  $$('[data-go]').forEach(b => b.addEventListener('click', () => setView(b.dataset.go)));
+
+  const reset = $('#reset');
+  if (reset) {
+    reset.addEventListener('click', () => {
+      if (reset.dataset.confirm) {
+        STATS = {};
+        storage.remove(CONFIG.statsKey);
+        renderStart();
+      } else {
+        reset.dataset.confirm = '1';
+        reset.textContent = 'Wirklich zurücksetzen? Nochmal tippen';
+      }
+    });
+  }
+}
+
+/* ==============================================================
+   10. Zuordnen – Karte auf den Geräteraum ziehen
+   ============================================================== */
+let drill = null;
+
+function startDrill() {
+  drill = { items: pickItems(roundLength()), index: 0, score: 0, wrong: [], answered: false };
+  renderDrill();
+}
+
+function renderDrill() {
+  if (drill.index >= drill.items.length) return renderResult(drill, startDrill);
+
+  const item = drill.items[drill.index];
+  drill.answered = false;
+
+  app.innerHTML = `
+    <div class="stage">
+      <div class="progress-info">
+        <span>Gerät ${drill.index + 1} von ${drill.items.length}</span>
+        <span>${drill.score} richtig</span>
+      </div>
+      <div class="progress"><i style="width:${drill.index / drill.items.length * 100}%"></i></div>
+      <div class="drag-card" id="card">
+        <div class="grip"></div>
+        <div><div class="name">${escapeHtml(item.name)}</div><div class="small muted">Wo liegt das?</div></div>
+      </div>
+      <div class="feedback" id="feedback"></div>
+    </div>
+    <section class="panel">
+      ${vehicleHTML(false)}
+      <div class="hint">Karte in den Geräteraum ziehen – oder einfach den Raum antippen.</div>
+    </section>`;
+
+  onZoneSelect(app, answerDrill);
+  enableDrag($('#card'));
+}
+
+function enableDrag(card) {
+  let ghost = null;
+  let overZone = null;
+
+  const move = e => {
+    if (!ghost) return;
+    ghost.style.left = (e.clientX - ghost.offsetWidth / 2) + 'px';
+    ghost.style.top  = (e.clientY - ghost.offsetHeight / 2) + 'px';
+
+    const el = document.elementFromPoint(e.clientX, e.clientY);
+    const zone = el && el.closest('.zone');
+    if (zone !== overZone) {
+      overZone?.classList.remove('hover');
+      overZone = zone;
+      overZone?.classList.add('hover');
+    }
+  };
+
+  const end = () => {
+    if (!ghost) return;
+    ghost.remove();
+    ghost = null;
+    card.classList.remove('lifted');
+    if (overZone) {
+      overZone.classList.remove('hover');
+      const room = overZone.dataset.room;
+      overZone = null;
+      answerDrill(room);
+    }
+  };
+
+  card.addEventListener('pointerdown', e => {
+    if (drill.answered) return;
+    e.preventDefault();
+    ghost = card.cloneNode(true);
+    ghost.classList.add('drag-ghost');
+    ghost.removeAttribute('id');
+    document.body.appendChild(ghost);
+    card.classList.add('lifted');
+    card.setPointerCapture(e.pointerId);
+    move(e);
+  });
+  card.addEventListener('pointermove', move);
+  card.addEventListener('pointerup', end);
+  card.addEventListener('pointercancel', end);
+}
+
+function answerDrill(room) {
+  if (drill.answered) return;
+  drill.answered = true;
+
+  const item = drill.items[drill.index];
+  const correct = room === item.room;
+  recordAnswer(item, correct);
+
+  const zone = r => $(`.zone[data-room="${CSS.escape(r)}"]`, app);
+  const feedback = $('#feedback');
+  const next = () => { drill.index++; renderDrill(); };
+
+  if (correct) {
+    drill.score++;
+    zone(room)?.classList.add('ok');
+    feedback.className = 'feedback show ok';
+    feedback.innerHTML = `<span>✔ Richtig: ${locationText(item)}</span>`;
+    setTimeout(next, 1300);
+  } else {
+    drill.wrong.push(item);
+    zone(room)?.classList.add('bad');
+    zone(item.room)?.classList.add('reveal');
+    feedback.className = 'feedback show bad';
+    feedback.innerHTML = `<span>✘ Falsch – richtig ist ${locationText(item)}</span><button class="btn" id="next">Weiter</button>`;
+    $('#next').addEventListener('click', next);
+    $('#next').focus();
+  }
+}
+
+/* ==============================================================
+   11. Quiz
+   ============================================================== */
+let quiz = null;
+
+function startQuiz() {
+  quiz = { items: pickItems(roundLength()).map(makeQuestion), index: 0, score: 0, wrong: [] };
+  renderQuiz();
+}
+
+/** Entweder "Wo liegt X?" oder "Welches Gerät liegt in Raum Y?" */
+function makeQuestion(item) {
+  const rooms = roomsPresent();
+  if (rooms.length < 2) return { item, type: 'where', options: [item.room] };
+
+  const others = ITEMS.filter(x => x.room !== item.room && x.name !== item.name);
+
+  if (Math.random() < 0.4 && others.length >= 3) {
+    const names = new Set([item.name]);
+    const distractors = [];
+    for (const x of shuffle(others.slice())) {
+      if (!names.has(x.name)) { names.add(x.name); distractors.push(x); }
+      if (distractors.length === 3) break;
+    }
+    return { item, type: 'what', options: shuffle([item, ...distractors]) };
+  }
+
+  const wrongRooms = shuffle(rooms.filter(r => r !== item.room)).slice(0, 3);
+  return { item, type: 'where', options: shuffle([item.room, ...wrongRooms]) };
+}
+
+function renderQuiz() {
+  if (quiz.index >= quiz.items.length) return renderResult(quiz, startQuiz);
+
+  const q = quiz.items[quiz.index];
+  const item = q.item;
+  const isCorrect = option => q.type === 'where' ? option === item.room : option === item;
+  const optionText = option => q.type === 'where' ? escapeHtml(roomLabel(option)) : escapeHtml(option.name);
+  const questionText = q.type === 'where'
+    ? `Wo liegt: ${escapeHtml(item.name)}?`
+    : `Welches Gerät liegt im ${escapeHtml(roomLabel(item.room))}?`;
+
+  app.innerHTML = `
+    <section class="panel">
+      <div class="progress-info">
+        <span>Frage ${quiz.index + 1} von ${quiz.items.length}</span>
+        <span>${quiz.score} richtig</span>
+      </div>
+      <div class="progress"><i style="width:${quiz.index / quiz.items.length * 100}%"></i></div>
+      <div class="question">${questionText}</div>
+      <div class="options">
+        ${q.options.map((o, k) => `<button class="option" data-k="${k}">${optionText(o)}</button>`).join('')}
+      </div>
+      <div class="feedback" id="feedback"></div>
+    </section>`;
+
+  $$('.option', app).forEach(button => button.addEventListener('click', () => {
+    const chosen = q.options[Number(button.dataset.k)];
+    const correct = isCorrect(chosen);
+    recordAnswer(item, correct);
+
+    $$('.option', app).forEach((b, k) => {
+      b.disabled = true;
+      if (isCorrect(q.options[k])) b.classList.add('ok');
+    });
+    if (!correct) button.classList.add('bad');
+
+    if (correct) quiz.score++; else quiz.wrong.push(item);
+
+    const feedback = $('#feedback');
+    feedback.className = 'feedback show ' + (correct ? 'ok' : 'bad');
+    feedback.innerHTML = `
+      <span>${correct ? '✔' : '✘'} <b>${escapeHtml(item.name)}</b> → ${escapeHtml(roomLabel(item.room))}${item.fach ? ' · ' + escapeHtml(item.fach) : ''}</span>
+      <button class="btn" id="next">Weiter</button>`;
+    $('#next').addEventListener('click', () => { quiz.index++; renderQuiz(); });
+    $('#next').focus();
+  }));
+}
+
+/* ==============================================================
+   12. Ergebnis einer Runde
+   ============================================================== */
+function renderResult(session, restart) {
+  const total = session.items.length;
+  const percent = Math.round(session.score / total * 100);
+  const praise = percent === 100 ? ' – sauber!' : percent >= 80 ? ' – gut dabei!' : ' – dranbleiben!';
+  const wrongUnique = [...new Map(session.wrong.map(i => [statKey(i), i])).values()];
+
+  app.innerHTML = `
+    <section class="panel">
+      <h2>Runde fertig</h2>
+      <div class="result-big">${session.score} / ${total}</div>
+      <div class="muted">${percent} % richtig${praise}</div>
+      ${wrongUnique.length ? `
+        <h3 style="margin-top:18px">Das solltest du dir noch anschauen</h3>
+        ${itemTable(wrongUnique, { showRoom: true })}` : ''}
+      <div class="row" style="margin-top:18px">
+        <button class="btn" id="again">Neue Runde</button>
+        <button class="btn secondary" id="home">Zum Start</button>
+      </div>
+    </section>`;
+
+  $('#again').addEventListener('click', restart);
+  $('#home').addEventListener('click', () => setView('start'));
+}
+
+/* ==============================================================
+   13. Lernen – Fahrzeug durchklicken
+   ============================================================== */
+let selectedRoom = 'G1';
+
+function renderLearn() {
+  app.innerHTML = `
+    <section class="panel">
+      ${vehicleHTML(true)}
+      <div class="hint">Geräteraum antippen, um die Beladung zu sehen.</div>
+    </section>
+    <section class="panel" id="room-panel"></section>
+    <section class="panel">
+      <h3>Gerät suchen</h3>
+      <input type="search" id="search" placeholder="z. B. Standrohr, Saugkorb …">
+      <div id="search-result" style="margin-top:8px"></div>
+    </section>`;
+
+  onZoneSelect(app, room => { selectedRoom = room; renderRoomPanel(); });
+  renderRoomPanel();
+
+  const search = $('#search');
+  const result = $('#search-result');
+  search.addEventListener('input', () => {
+    const term = search.value.trim().toLowerCase();
+    if (!term) { result.innerHTML = ''; return; }
+    const hits = ITEMS.filter(i => `${i.name} ${i.hint}`.toLowerCase().includes(term));
+    result.innerHTML = hits.length
+      ? itemTable(hits, { showRoom: true })
+      : '<span class="muted small">Nichts gefunden.</span>';
+  });
+}
+
+function renderRoomPanel() {
+  $$('.zone', app).forEach(z => z.classList.toggle('selected', z.dataset.room === selectedRoom));
+  const items = itemsInRoom(selectedRoom);
+  $('#room-panel').innerHTML = `<h2>${escapeHtml(roomLabel(selectedRoom))}</h2>`
+    + (items.length ? itemTable(items) : '<span class="muted">In diesem Raum ist laut Liste nichts eingetragen.</span>');
+}
+
+/* ==============================================================
+   14. Beladeliste (nur Ansicht)
+   ============================================================== */
+function renderList() {
+  const order = [...LAYOUT.filter(r => roomsPresent().includes(r)), ...extraRooms()];
+
+  app.innerHTML = `
+    <section class="panel">
+      <h2>Beladeliste</h2>
+      <p class="small muted" style="margin-top:0">${ITEMS.length} Geräte · Stand: ${escapeHtml(CONFIG.listStand)}. Die Liste wird zentral gepflegt.</p>
+      <input type="search" id="search" placeholder="Gerät suchen …" style="margin-bottom:10px">
+      <div id="list-body"></div>
+    </section>`;
+
+  const search = $('#search');
+  const body = $('#list-body');
+
+  const draw = () => {
+    const term = search.value.trim().toLowerCase();
+    const html = order.map(room => {
+      const items = itemsInRoom(room).filter(i => !term || `${i.name} ${i.hint}`.toLowerCase().includes(term));
+      return items.length ? `<h3 style="margin-top:16px">${escapeHtml(roomLabel(room))}</h3>${itemTable(items)}` : '';
+    }).join('');
+    body.innerHTML = html || '<span class="muted small">Nichts gefunden.</span>';
+  };
+
+  search.addEventListener('input', draw);
+  draw();
+}
+
+/* ==============================================================
+   15. Logos: fehlt eine Bilddatei, wird Text bzw. die Flamme gezeigt
+   ============================================================== */
+function setupLogos() {
+  $$('img[data-fallback]').forEach(img => {
+    const fallback = () => {
+      if (img.dataset.fallback === 'text') {
+        const span = document.createElement('span');
+        span.textContent = img.alt;
+        img.replaceWith(span);
+      } else {
+        img.remove();  // Flamme bleibt sichtbar, :has(img) greift nicht mehr
+      }
+    };
+    if (img.complete && img.naturalWidth === 0) fallback();
+    else img.addEventListener('error', fallback);
+  });
+}
+
+/* ==============================================================
+   16. Start
+   ============================================================== */
+setupLogos();
+setView('start');
+</script>
+</body>
+</html>
